@@ -4,7 +4,6 @@ const multer = require('multer');
 const path = require('path');
 const { uploadFile } = require('../controllers/uploadController');
 
-// Configure multer for file upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -26,7 +25,6 @@ const upload = multer({
   }
 });
 
-// Upload route
 router.post('/', upload.single('file'), uploadFile);
 
 module.exports = router;

@@ -1,10 +1,8 @@
 const schedule = require('node-schedule');
 const ScheduledMessage = require('../models/ScheduledMessage');
 
-// Store scheduled jobs in memory
 const scheduledJobs = {};
 
-// Schedule a message
 const scheduleMessage = async (req, res) => {
   try {
     const { message, day, time, recipient_email, recipient_name } = req.body;
@@ -16,7 +14,6 @@ const scheduleMessage = async (req, res) => {
       });
     }
 
-    // Save message to DB
     const scheduledMessage = new ScheduledMessage({
       message,
       scheduled_day: new Date(day),
@@ -28,7 +25,6 @@ const scheduleMessage = async (req, res) => {
 
     await scheduledMessage.save();
 
-    // Combine date and time
     const scheduleDateTime = new Date(`${day}T${time}`);
 
     if (isNaN(scheduleDateTime.getTime())) {
@@ -38,7 +34,6 @@ const scheduleMessage = async (req, res) => {
       });
     }
 
-    // Schedule job
     const job = schedule.scheduleJob(scheduleDateTime, async () => {
       try {
         await ScheduledMessage.findByIdAndUpdate(scheduledMessage._id, {
@@ -76,7 +71,6 @@ const scheduleMessage = async (req, res) => {
   }
 };
 
-// Get all scheduled messages
 const getScheduledMessages = async (req, res) => {
   try {
     const messages = await ScheduledMessage.find().sort({ scheduled_day: 1 });
@@ -95,7 +89,6 @@ const getScheduledMessages = async (req, res) => {
   }
 };
 
-// Initialize scheduled messages on server start
 const initializeScheduledMessages = async () => {
   try {
     const pendingMessages = await ScheduledMessage.find({ status: 'pending' });

@@ -4,15 +4,12 @@ const csv = require('csv-parser');
 const fs = require('fs');
 const mongoose = require('mongoose');
 
-// Connect to MongoDB first
 const initDB = async () => {
   await mongoose.connect('mongodb://localhost:27017/agentflow');
   console.log('Worker: MongoDB connected');
 };
 
-// Import models after MongoDB connection
 const loadModels = () => {
-  // Clear cached requires to get fresh model instances
   delete require.cache[require.resolve('../models/Agent')];
   delete require.cache[require.resolve('../models/User')];
   delete require.cache[require.resolve('../models/Account')];
@@ -20,7 +17,7 @@ const loadModels = () => {
   delete require.cache[require.resolve('../models/Carrier')];
   delete require.cache[require.resolve('../models/Policy')];
 
-  // Also clear from mongoose models
+
   delete mongoose.models['Agent'];
   delete mongoose.models['User'];
   delete mongoose.models['Account'];
@@ -28,7 +25,7 @@ const loadModels = () => {
   delete mongoose.models['Carrier'];
   delete mongoose.models['Policy'];
 
-  // Require fresh models
+
   const Agent = require('../models/Agent');
   const User = require('../models/User');
   const Account = require('../models/Account');
@@ -40,10 +37,9 @@ const loadModels = () => {
 };
 
 const processFile = async (filePath, fileType) => {
-  // Ensure DB is connected
+ 
   await initDB();
 
-  // Load models after DB connection
   const { Agent, User, Account, LOB, Carrier, Policy } = loadModels();
 
   try {
@@ -64,7 +60,6 @@ const processFile = async (filePath, fileType) => {
       });
     }
 
-    // Process data and insert into respective collections
     const results = {
       agents: 0,
       users: 0,
@@ -77,7 +72,7 @@ const processFile = async (filePath, fileType) => {
 
     for (const row of data) {
       try {
-        // Create or find Agent
+       
         let agent = null;
         if (row.agent_name) {
           agent = await Agent.findOneAndUpdate(
@@ -88,7 +83,6 @@ const processFile = async (filePath, fileType) => {
           results.agents++;
         }
 
-        // Create User
         let user = null;
         if (row.first_name && row.email) {
           user = await User.findOneAndUpdate(
@@ -109,7 +103,6 @@ const processFile = async (filePath, fileType) => {
           results.users++;
         }
 
-        // Create Account
         let account = null;
         if (row.account_name && user) {
           account = await Account.findOneAndUpdate(
@@ -123,7 +116,6 @@ const processFile = async (filePath, fileType) => {
           results.accounts++;
         }
 
-        // Create or find LOB (Policy Category)
         let lob = null;
         if (row.category_name) {
           lob = await LOB.findOneAndUpdate(
@@ -134,7 +126,6 @@ const processFile = async (filePath, fileType) => {
           results.lobs++;
         }
 
-        // Create or find Carrier
         let carrier = null;
         if (row.company_name) {
           carrier = await Carrier.findOneAndUpdate(
@@ -145,7 +136,6 @@ const processFile = async (filePath, fileType) => {
           results.carriers++;
         }
 
-        // Create Policy
         if (row.policy_number && user && lob && carrier) {
           await Policy.findOneAndUpdate(
             { policy_number: row.policy_number },
@@ -169,10 +159,8 @@ const processFile = async (filePath, fileType) => {
       }
     }
 
-    // Close MongoDB connection
     await mongoose.connection.close();
 
-    // Send results back to main thread
     parentPort.postMessage({
       success: true,
       results: results
@@ -185,5 +173,4 @@ const processFile = async (filePath, fileType) => {
   }
 };
 
-// Start processing
 processFile(workerData.filePath, workerData.fileType);

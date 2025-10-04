@@ -5,10 +5,8 @@ const {
   getScheduledMessages
 } = require('../controllers/messageController');
 
-// Schedule a message
-router.post('/schedule', scheduleMessage);
 
-// Get all scheduled messages
+router.post('/schedule', scheduleMessage);
 router.get('/scheduled', getScheduledMessages);
 
 module.exports = router;

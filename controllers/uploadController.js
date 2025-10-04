@@ -24,7 +24,6 @@ const uploadFile = async (req, res) => {
       });
     }
 
-    // Worker thread for processing
     const worker = new Worker(path.join(__dirname, '../workers/uploadWorker.js'), {
       workerData: { filePath, fileType },
     });

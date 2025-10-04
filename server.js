@@ -3,7 +3,7 @@ const connectDB = require('./config/db');
 const monitorCPU = require('./utils/cpuMonitor');
 const { initializeScheduledMessages } = require('./controllers/messageController');
 
-// Import routes
+
 const uploadRoutes = require('./routes/upload');
 const policyRoutes = require('./routes/policy');
 const messageRoutes = require('./routes/message');
@@ -12,19 +12,15 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Connect to MongoDB
 connectDB();
 initializeScheduledMessages();
 
-// Start CPU monitoring
 monitorCPU();
 
-// Routes
 app.use('/api/upload', uploadRoutes);
 app.use('/api/policy', policyRoutes);
 app.use('/api/message', messageRoutes);
 
-// Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({
     success: true,
@@ -33,7 +29,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Root endpoint
+
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
@@ -49,7 +45,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// Error handling middleware
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({

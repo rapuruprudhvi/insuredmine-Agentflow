@@ -3,7 +3,6 @@ const User = require('../models/User');
 const LOB = require('../models/LOB');
 const Carrier = require('../models/Carrier');
 
-// Search policy info by username
 const searchPolicyByUsername = async (req, res) => {
   try {
     const { username } = req.query;
